@@ -14,28 +14,19 @@ knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(dplyr)
 
-data <- read.csv("https://raw.githubusercontent.com/jaysonkunkel/STA-209-final/main/grinnell-dateability.csv?token=GHSAT0AAAAAACRXXOSGPNCKF5TGEHWWEF52ZRSZU7A")
+data <- read.csv("https://raw.githubusercontent.com/jaysonkunkel/STA-209-final/main/grinnell-dateability.csv")
 ```
 
 ```{r}
-
-## Better histograms
-gh <- function(bins = 10) {
-  geom_histogram(color = 'black', fill = 'gray80', bins = bins)
-}
-
-dateability <- as.numeric(as.character(data$Date.ability))
-
-ggplot(data, aes(dateability))+
-  geom_histogram(bins = 15)+
-  facet_wrap("Age")
+ggplot(data, aes(Date.ability))+
+  gh(bins = 15)
 
 ggplot(data, aes(dateability))+
   geom_boxplot()+
   facet_wrap("Age")
 
 ggplot(data, aes(dateability))+
-  geom_histogram(bins = 15)+
+  geom_histogram(bins = 10)+
   facet_wrap("Gender")
 
 ggplot(data, aes(First_date, fill = Orientation))+
@@ -48,5 +39,11 @@ sexual <- (data$Hookups + data$Situationships + data$One_night)
 
 ggplot(data, aes(sexual))+
   gh(bins = 15)
+
+ggplot(data, aes(First_date, fill = Academic_Div))+
+  geom_bar(position = "dodge")
+
+lm(Duration_short ~ Orientation, data) %>% summary()
 ```
+
 
