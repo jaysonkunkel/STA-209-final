@@ -31,19 +31,63 @@ bootstrap <- function(x, statistic, n = 1000L) {
              Statistic = bs)
 }
 
-data <- read.csv("https://raw.githubusercontent.com/jaysonkunkel/STA-209-final/main/grinnell-dateability.csv")
+# read in file
+dateability <- read.csv("https://raw.githubusercontent.com/jaysonkunkel/STA-209-final/main/grinnell-dateability.csv")
+
+# copy of data without some NA
+data <- dateability %>% filter(dateability$Date.ability != "N/A")
+
+# convert from character to numeric
+data$Date.ability <- as.integer(data$Date.ability)
+data$Duration_long <- as.numeric(data$Duration_long)
+data$Duration_short <- as.numeric(data$Duration_short)
+
+# add number of sexual partners and total partners
+data <- data %>% mutate(Sexual = Hookups + Situationships + One_night)
+data <- data %>% mutate(Total_partners = Romantic + Sexual)
 ```
+
+# Dateability plots
 
 ```{r}
 ggplot(data, aes(Date.ability))+
   gh(bins = 15)
 
-ggplot(data, aes(dateability))+
+# dateability by gender
+ggplot(data, aes(Date.ability, fill = Gender)) +
+  geom_bar(position = "stack") +
+  labs(x = "Dateability") + 
+  scale_x_continuous(breaks = seq(0, 10, by = 1))
+
+# dateability by age
+ggplot(data, aes(Date.ability))+
   geom_boxplot()+
   facet_wrap("Age")
 
-ggplot(data, aes(dateability))+
-  geom_histogram(bins = 10)+
+# dateability by major
+ggplot(data, aes(Date.ability, fill = Academic_Div)) +
+  geom_bar(position = "fill") +
+  labs(x = "Dateability") + 
+  scale_x_continuous(breaks = seq(0, 10, by = 1))
+
+# dateability by orientation
+ggplot(data, aes(Date.ability, fill = Orientation)) +
+  geom_bar(position = "dodge", color = "black") +
+  labs(x = "Dateability") + 
+  scale_x_continuous(breaks = seq(0, 10, by = 1))
+
+# dateability by number of total partners
+ggplot(data, aes(Date.ability, fill = as.character(Total_partners))) +
+  geom_bar(position = "fill", color = "black") +
+  labs(x = "Dateability") + 
+  scale_x_continuous(breaks = seq(0, 10, by = 1))
+
+```
+
+
+```{r}
+ggplot(data, aes(Date.ability))+
+  gh(bins = 15)+
   facet_wrap("Gender")
 
 ggplot(data, aes(First_date, fill = Orientation))+
@@ -51,8 +95,6 @@ ggplot(data, aes(First_date, fill = Orientation))+
 
 ggplot(data, aes(Romantic))+
   gh(bins = 10)
-
-sexual <- (data$Hookups + data$Situationships + data$One_night)
 
 ggplot(data, aes(sexual))+
   gh(bins = 15)
@@ -64,8 +106,42 @@ lm(Duration_short ~ Orientation, data) %>% summary()
 ```
 
 ```{r}
+dateability_boot <- bootstrap(data$Date.ability, mean)
+ggplot(dateability_boot, aes(Statistic)) + 
+  gh(bins = 15)
 
+romantic_boot <- bootstrap(data$Romantic, mean)
+ggplot(romantic_boot, aes(Statistic)) + 
+  gh(bins = 15)
+
+longest_boot <- bootstrap(data$Duration_long, mean)
+shortest_boot <- bootstrap(data$Duration_short, mean)
+
+ggplot(longest_boot, aes(Statistic)) + 
+  gh(bins = 15)
+
+ggplot(shortest_boot, aes(Statistic)) + 
+  gh(bins = 15)
 ```
+
+```{r}
+# proportion of romantic:sexual partners between gender
+
+data <- data %>% mutate(rom_to_sex = Romantic/Sexual)
+
+ggplot(data, aes(x = Gender)) +
+  geom_bar(position = "dodge")
+
+# ignores cases where people have 0 sexual partners
+b <- bootstrap(is.finite(data$rom_to_sex), mean)
+
+ggplot(b, aes(Statistic)) +
+  gh(bins = 15)
+
+
+with(data, table(Gender, Total_partners))
+```
+
 
 
 
