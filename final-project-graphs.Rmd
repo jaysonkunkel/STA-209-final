@@ -14,6 +14,23 @@ knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(dplyr)
 
+theme_set(theme_bw())
+
+## Better histograms
+gh <- function(bins = 10) {
+  geom_histogram(color = 'black', fill = 'gray80', bins = bins)
+}
+
+## Bootstrapping function
+bootstrap <- function(x, statistic, n = 1000L) {
+  bs <- replicate(n, {
+    sb <- sample(x, replace = TRUE)
+    statistic(sb)
+  })
+  data.frame(Sample = seq_len(n), 
+             Statistic = bs)
+}
+
 data <- read.csv("https://raw.githubusercontent.com/jaysonkunkel/STA-209-final/main/grinnell-dateability.csv")
 ```
 
@@ -45,5 +62,10 @@ ggplot(data, aes(First_date, fill = Academic_Div))+
 
 lm(Duration_short ~ Orientation, data) %>% summary()
 ```
+
+```{r}
+
+```
+
 
 
