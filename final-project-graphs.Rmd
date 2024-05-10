@@ -84,45 +84,75 @@ ggplot(data, aes(Date.ability, fill = as.character(Total_partners))) +
 
 ```
 
+# Other stuff
 
 ```{r}
+# dateability by gender
 ggplot(data, aes(Date.ability))+
   gh(bins = 15)+
   facet_wrap("Gender")
 
+# first date by sexual orientation
 ggplot(data, aes(First_date, fill = Orientation))+
   geom_bar(position = "fill")
 
+# histograms of romantic and sexual partners
 ggplot(data, aes(Romantic))+
   gh(bins = 10)
 
 ggplot(data, aes(sexual))+
   gh(bins = 15)
 
+# first date by major
 ggplot(data, aes(First_date, fill = Academic_Div))+
   geom_bar(position = "dodge")
 
+# predict shortest relationship with orientation
 lm(Duration_short ~ Orientation, data) %>% summary()
 ```
 
+# Bootstrapping
+
 ```{r}
+# bootstrap the average dateability
 dateability_boot <- bootstrap(data$Date.ability, mean)
 ggplot(dateability_boot, aes(Statistic)) + 
-  gh(bins = 15)
+  gh(bins = 15) +
+  labs(x = "Dateability")
 
+# bootstrap the average number of romantic partners
 romantic_boot <- bootstrap(data$Romantic, mean)
 ggplot(romantic_boot, aes(Statistic)) + 
-  gh(bins = 15)
+  gh(bins = 15) +
+  labs(x = "Romantic Partners")
 
+# bootstrap the average number of sexual partners
+sexual_boot <- bootstrap(data$Sexual, mean)
+ggplot(sexual_boot, aes(Statistic)) + 
+  gh(bins = 15) +
+  labs(x = "Sexual Partners")
+
+# bootstrap the average number of total partners
+total_boot <- bootstrap(data$Total_partners, mean)
+ggplot(total_boot, aes(Statistic)) + 
+  gh(bins = 15) +
+  labs(x = "Total Partners")
+
+
+## bootstrap the average longest and shortest relationship
 longest_boot <- bootstrap(data$Duration_long, mean)
 shortest_boot <- bootstrap(data$Duration_short, mean)
 
 ggplot(longest_boot, aes(Statistic)) + 
-  gh(bins = 15)
+  gh(bins = 15) +
+  labs(x = "Longest Relationship in Weeks")
 
 ggplot(shortest_boot, aes(Statistic)) + 
-  gh(bins = 15)
+  gh(bins = 15) +
+  labs(x = "Shortest Relationship in Weeks")
 ```
+
+# Random
 
 ```{r}
 # proportion of romantic:sexual partners between gender
@@ -141,6 +171,91 @@ ggplot(b, aes(Statistic)) +
 
 with(data, table(Gender, Total_partners))
 ```
+
+# Google Doc
+
+```{r}
+# correlation between origin and number of partners
+
+lm(Romantic ~ Origin, data) %>% summary()
+lm(Sexual ~ Origin, data) %>% summary()
+lm(Total_partners ~ Origin, data) %>% summary()
+# only had 2 countryside - one had 9 romantic
+
+ggplot(data, aes(Origin, Romantic)) +
+  geom_jitter() +
+  geom_smooth(method = lm, se = FALSE)
+
+ggplot(data, aes(Origin, Sexual)) +
+  geom_jitter() +
+  geom_smooth(method = lm, se = FALSE)
+
+aov(Romantic ~ Origin, data) %>% summary()
+aov(Romantic ~ Origin, data) %>% TukeyHSD()
+# diffs: Small town-Countryside, Suburban-Countryside, Unsure-Countryside, Urban/Metropolitan City-Countryside
+
+aov(Sexual ~ Origin, data) %>% summary()
+aov(Total_partners ~ Origin, data) %>% summary()
+```
+
+```{r}
+# does gender play a role in the distribution of romantic and sexual partners
+#prop test
+
+lm(is.finite(rom_to_sex) ~ Gender, data) %>% summary()
+lm(is.finite(rom_to_sex) ~ Orientation, data) %>% summary()
+lm(is.finite(rom_to_sex) ~ Academic_Div, data) %>% summary()
+
+aov(is.finite(rom_to_sex) ~ Gender, data) %>% summary()
+aov(is.finite(rom_to_sex) ~ Orientation, data) %>% summary()
+aov(is.finite(rom_to_sex) ~ Academic_Div, data) %>% summary()
+
+ggplot(data, aes(Gender, is.finite(rom_to_sex))) +
+  geom_jitter() +
+  geom_smooth(method = lm, se = FALSE)
+```
+
+```{r}
+# how does sexual orientation affect dating outcome
+aov(Total_partners ~ Orientation, data) %>% summary()
+
+aov(Duration_long ~ Orientation, data) %>% summary()
+aov(Duration_short ~ Orientation, data) %>% summary()
+
+aov(Sexual ~ Orientation, data) %>% summary()
+aov(Romantic ~ Orientation, data) %>% summary()
+
+aov(Duration_long ~ First_date, data) %>% summary()
+aov(Duration_short ~ First_date, data) %>% summary()
+```
+
+```{r}
+# tests on self-rated dateability (does gender or major play a role in how you rate yourself)
+# comments indicate statistical significance
+
+aov(Date.ability ~ Gender, data) %>% summary()
+aov(Date.ability ~ Academic_Div, data) %>% summary()
+aov(Date.ability ~ Orientation, data) %>% summary
+aov(Date.ability ~ as.character(Sexual), data) %>% summary()
+aov(Date.ability ~ as.character(Total_partners), data) %>% summary()
+
+aov(Date.ability ~ as.character(Age), data) %>% summary()
+aov(Date.ability ~ as.character(Age), data) %>% TukeyHSD()
+# groups: 23-19, 23-20, 23-21, 23-22
+# however, we only had a few 23 y/o, so this may not be actually significant
+
+aov(Date.ability ~ as.character(Romantic), data) %>% summary()
+aov(Date.ability ~ as.character(Romantic), data) %>% TukeyHSD()
+# difference between 3 and 0 romantic partners
+
+lm(Date.ability ~ Romantic, data) %>% summary()
+lm(Date.ability ~ factor(Romantic), data) %>% summary()
+
+lm(Date.ability ~ Age, data) %>% summary()
+lm(Date.ability ~ factor(Age), data) %>% summary()
+```
+
+
 
 
 
