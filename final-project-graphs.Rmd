@@ -115,33 +115,46 @@ lm(Duration_short ~ Orientation, data) %>% summary()
 
 ```{r}
 # bootstrap the average dateability
+set.seed(123)
 dateability_boot <- bootstrap(data$Date.ability, mean)
 ggplot(dateability_boot, aes(Statistic)) + 
   gh(bins = 15) +
   labs(x = "Dateability")
+mean(dateability_boot$Statistic)
 
 # bootstrap the average number of romantic partners
+set.seed(123)
 romantic_boot <- bootstrap(data$Romantic, mean)
 ggplot(romantic_boot, aes(Statistic)) + 
   gh(bins = 15) +
   labs(x = "Romantic Partners")
+mean(romantic_boot$Statistic)
 
 # bootstrap the average number of sexual partners
+set.seed(123)
 sexual_boot <- bootstrap(data$Sexual, mean)
 ggplot(sexual_boot, aes(Statistic)) + 
   gh(bins = 15) +
   labs(x = "Sexual Partners")
+mean(sexual_boot$Statistic)
 
 # bootstrap the average number of total partners
+set.seed(123)
 total_boot <- bootstrap(data$Total_partners, mean)
 ggplot(total_boot, aes(Statistic)) + 
   gh(bins = 15) +
   labs(x = "Total Partners")
+mean(total_boot$Statistic)
 
 
 ## bootstrap the average longest and shortest relationship
+set.seed(123)
 longest_boot <- bootstrap(data$Duration_long, mean)
+mean(longest_boot$Statistic)
+
+set.seed(123)
 shortest_boot <- bootstrap(data$Duration_short, mean)
+mean(shortest_boot$Statistic)
 
 ggplot(longest_boot, aes(Statistic)) + 
   gh(bins = 15) +
@@ -254,6 +267,119 @@ lm(Date.ability ~ factor(Romantic), data) %>% summary()
 lm(Date.ability ~ Age, data) %>% summary()
 lm(Date.ability ~ factor(Age), data) %>% summary()
 ```
+
+# Front slide + others
+
+```{r}
+first date spot based on orientation
+
+# first date by sexual orientation
+ggplot(data, aes(First_date, fill = Orientation))+
+  geom_bar(position = "fill") +
+  labs(x = "First Date Choice")
+```
+
+# Fucking around
+
+```{r}
+
+library(ggplot2)
+library(gridExtra)
+
+data_male <- data %>% filter(data$Gender == "Male")
+
+set.seed(123)
+male_boot_romantic <- bootstrap(data_male$Romantic, mean)
+male_rom <- ggplot(male_boot_romantic, aes(Statistic)) + 
+       gh(bins = 15) +
+       labs(x = "Romantic Partners for Males")
+male_rom
+
+set.seed(123)
+male_boot_sexual <- bootstrap(data_male$Sexual, mean)
+male_sex <- ggplot(male_boot_sexual, aes(Statistic)) + 
+       gh(bins = 15) +
+       labs(x = "Sexual Partners for Males")
+male_sex
+
+set.seed(123)
+male_boot_total <- bootstrap(data_male$Total_partners, mean)
+male_total <- ggplot(male_boot_total, aes(Statistic)) + 
+       gh(bins = 15) +
+       labs(x = "Total Partners for Males")
+male_total
+
+# -------------------------------------------------------------------------------------------------
+
+data_female <- data %>% filter(data$Gender == "Female")
+
+set.seed(123)
+female_boot_romantic <- bootstrap(data_female$Romantic, mean)
+female_rom <- ggplot(female_boot_romantic, aes(Statistic)) + 
+       gh(bins = 15) +
+       labs(x = "Romantic Partners for Females")
+female_rom
+
+set.seed(123)
+female_boot_sexual <- bootstrap(data_female$Sexual, mean)
+female_sex <- ggplot(female_boot_sexual, aes(Statistic)) + 
+       gh(bins = 15) +
+       labs(x = "Sexual Partners for Females")
+female_sex
+
+set.seed(123)
+female_boot_total <- bootstrap(data_female$Total_partners, mean)
+female_total <- ggplot(female_boot_total, aes(Statistic)) + 
+       gh(bins = 15) +
+       labs(x = "Total Partners for Females")
+female_total
+
+# -------------------------------------------------------------------------------------------------
+
+data_nb <- data %>% filter(data$Gender == "Non-binary / third gender")
+
+set.seed(123)
+nb_boot_romantic <- bootstrap(data_nb$Romantic, mean)
+nb_rom <- ggplot(nb_boot_romantic, aes(Statistic)) + 
+       gh(bins = 15) +
+       labs(x = "Romantic Partners for Gender Non-conforming")
+nb_rom
+
+set.seed(123)
+nb_boot_sexual <- bootstrap(data_nb$Sexual, mean)
+nb_sex <- ggplot(nb_boot_sexual, aes(Statistic)) + 
+       gh(bins = 15) +
+       labs(x = "Sexual Partners for Gender Non-conforming")
+nb_sex
+
+set.seed(123)
+nb_boot_total <- bootstrap(data_nb$Total_partners, mean)
+nb_total <- ggplot(nb_boot_total, aes(Statistic)) + 
+       gh(bins = 15) +
+       labs(x = "Total Partners for Gender Non-conforming")
+nb_total
+
+# -------------------------------------------------------------------------------------------------
+
+grid.arrange(male_sex, female_sex, nb_sex)
+grid.arrange(male_rom, female_rom, nb_rom)
+grid.arrange(male_total, female_total, nb_total)
+
+# -------------------------------------------------------------------------------------------------
+
+# Build dataset with different distributions
+dat <- data.frame(
+  type = c( "Male_rom", "Female_rom"),
+  value = c( male_boot_total$Statistic, female_boot_total$Statistic)
+)
+
+p <- dat %>%
+  ggplot( aes(x = value, fill = type)) +
+    geom_histogram( color="#e9ecef", alpha=0.5, position = 'identity') +
+    scale_fill_manual(values=c("red", "blue"))
+p
+```
+
 
 
 
